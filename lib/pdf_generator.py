@@ -1,9 +1,9 @@
-
 """
 
  Generate PDFs
 
  Needed : sudo apt install -y wkhtmltopdf
+ Or Windows: https://wkhtmltopdf.org/downloads.html
 
 """
 
@@ -12,11 +12,11 @@ import pdf417
 import os
 from lib.models.dte import DTE, DTEBuidler, DTECAF
 from jinja2 import Environment, FileSystemLoader
+from instance.config import WKHTMLTOPDF_EXE_PATH
 
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class PDFGenerator:
-
 	__template_by_type = {
 							52:'web/templates/sii_document_52.html',
 							33:'web/templates/sii_document_33.html'
@@ -28,13 +28,19 @@ class PDFGenerator:
 		html = self._populate_jinja_template(dte, ted)
 		options = {
 			'page-size': 'A3',
-			'dpi': 600
+			'dpi': 600,
+			'enable-local-file-access': None,
+			'load-error-handling': 'ignore'
 		}
 
 		filename = str(dte.get_document_id()) + '.pdf'
 		fullpath = FILE_DIR + '/../temp/' + filename
 
-		pdf = pdfkit.from_string(html, fullpath, options=options)
+		""" Path to wkhtmltopdf """
+		path_wkhtmltopdf = WKHTMLTOPDF_EXE_PATH
+		config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+
+		pdf = pdfkit.from_string(html, fullpath, options=options, configuration=config)
 		return filename
 
 	def generate_binary(self, dte):
@@ -53,8 +59,9 @@ class PDFGenerator:
 
 	def _populate_jinja_template(self, dte, ted):
 		""" Get template path by type """
-		template_path = self.__template_by_type[52]
-		with open(template_path) as f:
+		document_type = dte.get_document_type()
+		template_path = self.__template_by_type[int(document_type)]
+		with open(template_path, encoding="utf-8") as f:
 			template_str = f.read()
 		""" Load template """
 		template = Environment(loader=FileSystemLoader([FILE_DIR + '/web/templates', FILE_DIR + '/../temp'])).from_string(template_str)
@@ -82,6 +89,8 @@ class PDFGenerator:
 		unique = 1
 		filename = str(unique) + 'barcode.png'
 		filepath = FILE_DIR + '/../temp/' + filename
+		""" Stripping white space and \n """
+		ted_string = ted_string.replace(" ", "").replace("\n", "")
 		codes = pdf417.encode(ted_string, columns=10, security_level=5)
 		image = pdf417.render_image(codes, scale=3, ratio=3, padding=5)  # Pillow Image object
 		image.save(filepath)

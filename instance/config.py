@@ -4,3 +4,5 @@ DEBUG_MODE = True
 
 APPLICATION_NAME = "TEST"
 REFERER = "https://test.cl"
+
+WKHTMLTOPDF_EXE_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"

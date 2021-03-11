@@ -31,7 +31,7 @@ DTE_SII_DATE_FORMAT_SHORT = '%Y-%m-%d'
 
 """ Future : Database """
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-with open(FILE_DIR + '/database/codes.json') as json_file:
+with open(FILE_DIR + '\\database\\codes.json', encoding="utf-8") as json_file:
 	db_codes = json.load(json_file)
 
 class DTEPerson:
@@ -324,7 +324,8 @@ class DTEItems:
 	(Precio Unitario  * Cantidad ) – Monto Descuento + Monto Recargo
 	"""
 
-	__properties_by_document_type = {52: {},
+	__properties_by_document_type = {
+									52: {},
 									33: {},
 									43: {'LiqDocType':'TpoDocLiq'},
 									0: { 'Index':'NroLinDet',
@@ -754,6 +755,7 @@ class DTE:
 							'Phone':''
 				},
 				'Details': self._items.get_item_list_for_template(),
+				'References': self._reference,
 				'Comment': self._header.comment,
 				'Totales': self._header.totales
 		}
@@ -806,7 +808,6 @@ class DTEBuidler:
 					'_RSAPrivateKey': 'RSASK',
 					'_RSAPublicKey': 'RSAPUBK'
 					}
-
 
 	def build(self, type, sender, receiver, header, items, caf):
 		sender_object = DTEPerson(1, sender)
@@ -869,6 +870,13 @@ class DTEBuidler:
 						parameters['Items'] = {}
 					parameters['Items'][items] = {}
 					parameters['Items'][items] = self.iterate_recurs_etree(child, item)
+					items = items + 1
+				if tag == 'References':
+					item = {}
+					if items == 0:
+						parameters['References'] = {}
+					parameters['References'][items] = {}
+					parameters['References'][items] = self.iterate_recurs_etree(child, item)
 					items = items + 1
 				if tag == 'CAF':
 					caf = {}
@@ -934,7 +942,7 @@ class DTEBuidler:
 		header = DTEHeader(sender, receiver, document_type, document_number, 1, datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT), {}, items.get_totales(iva_rate))
 		header.load_specifics_from_xml_parameters(document_type, header_parameters)
 		""" Build final DTE """
-		dte = DTE(header, items, '', '', '', '', '',caf=caf, ted=dumped_ted)
+		dte = DTE(header, items, discount='', reference='', other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
 
 		""" Extract tree and dump pretty XML """
 		dte_etree = etree.fromstring(dte.dump())
