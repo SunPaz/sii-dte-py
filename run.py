@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 """
-This is the file that is invoked to start up a development server.
-It gets a copy of the app from your package and runs it.
+Main entry point
 """
 
 __version__ = '0.1'
