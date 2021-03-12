@@ -1,4 +1,27 @@
-﻿<head>
+﻿{%- macro format_price(price, thousand_separator='.', decimal_separator=',', decimal_places=4) -%}
+{%- set price_as_string = price | string -%}
+{%- set price_split = price_as_string.split('.') -%}
+{%- set price_integer = price_split[0] -%}
+{%- if price_split | count > 1 -%}
+{%- set price_fraction = price_split[1] -%}
+{%- if price_fraction | length < decimal_places -%}
+{%- set price_fraction = price_fraction.ljust(decimal_places, '0') -%}
+{%- else -%}
+{%- set price_fraction = price_fraction[:decimal_places] -%}
+{%- endif -%}
+{%- else -%}
+{%- set price_fraction = '' -%}
+{%- endif -%}
+{%- set formatted_price_integer = price_integer | reverse | batch(3) | map('join', '') | join(thousand_separator) | reverse -%}
+{%- if price_fraction != '' -%}
+{%- set formatted_price = formatted_price_integer ~ decimal_separator ~ price_fraction -%}
+{%- else -%}
+{%- set formatted_price = formatted_price_integer-%}
+{%- endif -%}
+{{- formatted_price -}} {%- endmacro -%}
+
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="DTE, SII, OpenSource">
@@ -15,9 +38,8 @@
 
 <style>
     .container {
-        margin-top: 2%;
-        max-width: 1024px;
-        border-style: solid;
+        margin-top: 24px;
+        max-width: 100%;
         border-width: 1px;
     }
 
@@ -46,7 +68,7 @@
         width: 600px;
         color: black;
         text-align: left;
-        font-size: 10pt;
+        font-size: medium;
         font: 'Arial';
         float: left;
     }
@@ -58,7 +80,7 @@
         width: 100%;
         padding: 5px;
         text-align: left;
-        font-size: 10pt;
+        font-size: medium;
         font: 'Arial';
         margin-top: 200px;
     }
@@ -79,7 +101,6 @@
         position: relative;
         float: right;
     }
-
 
     .details {
         border-style: solid;
@@ -162,16 +183,16 @@
             </div>
             <div class="part details">
                 <br />
-                <table class="table">
+                <table class="table" style="font-size:small">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Código</th>
                             <th>Descripción</th>
-                            <th>Cantidad</th>
+                            <th>Cant.</th>
                             <th>Unid. P.</th>
                             <th>Unit.</th>
-                            <th>$ Dscto.</th>
+                            <!--<th>$ Dscto.</th>-->
                             <th>Valor</th>
                         </tr>
                     </thead>
@@ -183,18 +204,18 @@
                             <td>{{ parameters['Details'][unit]['Code'] }}</td>
                             <td>{{ parameters['Details'][unit]['Name'] }}</td>
                             <td>{{ parameters['Details'][unit]['Quantity'] | int }}</td>
-                            <td>{{ parameters['Details'][unit]['UnitPrice'] }}</td>
+                            <!---<td>${{ format_price(parameters['Details'][unit]['UnitPrice'] | float | round, decimal_places=0) }}</td>-->
                             <td>{{ parameters['Details'][unit]['Unit'] }}</td>
-                            <td></td>
-                            <td>{{ parameters['Details'][unit]['ItemPrice'] }}</td>
+                            <td>${{ parameters['Details'][unit]['DiscountValor'] }}</td>
+                            <td>${{ format_price(parameters['Details'][unit]['ItemPrice'] | float | round, decimal_places=0) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <br />
-                <table class="table">
+                <table class="table" style="font-size:small">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>Tipo Documento</th>
                             <th>Folio</th>
                             <th>Fecha</th>
@@ -202,14 +223,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!--
+                        {% set index = 1 %}
+                        {% for ref in parameters['References'] %}
                         <tr>
-                            <td>Guía de Despacho Electrónica</td>
-                            <td>200</td>
-                            <td>01-11-2009 </td>
-                            <td>Factura Guía de Despacho</td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ parameters['References'][ref]['TpoDocRef'] }}</td>
+                            <td>{{ parameters['References'][ref]['FolioRef'] }}</td>
+                            <td>{{ parameters['References'][ref]['FchRef'] }}</td>
+                            <td></td>
                         </tr>
-                            -->
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -221,11 +244,33 @@
 
                 </div>
                 <div class="totales">
-                    <div class="grid-item"><b>Descuento</b></div> <div class="grid-item"></div>
-                    <div class="grid-item"><b>Monto Neto</b></div> <div class="grid-item">${{ parameters['Totales']['Net'] }}</div>
-                    <div class="grid-item"><b>Monto Exento</b></div> <div class="grid-item">$0</div>
-                    <div class="grid-item"><b>IVA ({{ parameters['Totales']['Rate'] | float * 100}} %)</b></div> <div class="grid-item">${{ ",.2f" | format(parameters['Totales']['Rate'] | float * parameters['Totales']['Net'])  }}</div>
-                    <div class="grid-item"><b>Monto Total</b></div> <div class="grid-item">${{ parameters['Totales']['Total'] }}</div>
+                    <table class="table" style="margin:0px">
+                        <thead>
+                            <tr></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Descuento</td>
+                                <td>$0</td>
+                            </tr>
+                            <tr>
+                                <td>Monto Neto</td>
+                                <td>${{ format_price(parameters['Totales']['Net'] | float | round, decimal_places=0) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Monto Exento</td>
+                                <td>$0</td>
+                            </tr>
+                            <tr>
+                                <td>IVA ({{ format_price(parameters['Totales']['Rate'] | float * 100, decimal_places=1) }} %)</td>
+                                <td>${{ format_price(parameters['Totales']['Rate'] | float * parameters['Totales']['Net'] | float | round, decimal_places=0)  }}</td>
+                            </tr>
+                            <tr>
+                                <td>Monto Total</td>
+                                <td>${{ format_price(parameters['Totales']['Total'] | float | round, decimal_places=0) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="part">
@@ -236,7 +281,7 @@
                     Res. {{ parameters['Header']['Specifics']['User']['Resolution'] }} de {{ parameters['Header']['Specifics']['User']['ResolutionDate'] }} <br />
                     Verifique documento: www.sii.cl <br />
                 </div>
-                <div class="manual-registed">
+                <div class="manual-registed" style="visibility:hidden">
                     Nombre:___________________________________ <br />
                     RUT: _________________ FECHA: ____________ <br />
                     Recinto: _______________ FIRMA: ____________ <br />
