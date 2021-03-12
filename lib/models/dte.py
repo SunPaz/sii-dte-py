@@ -71,7 +71,10 @@ class DTEPerson:
 		self._parameters = parameters
 
 	def get_attr(self, attr):
-		return self._parameters[attr]
+		try:
+			return self._parameters[attr]
+		except:
+			return '';
 
 	def dump(self):
 		outside_markup = self.__markup[self.__types[self._type]]['Type']
@@ -215,6 +218,8 @@ class DTEHeader:
 			if property_type == 'Description':
 				""" In that case we need to get description according to searched property """
 				properties = db_codes[property_type][key]
+			elif property_type == 'TipoDoc':
+				properties = db_codes[property_type][key]
 			else:
 				properties = db_codes[property_type]
 			""" Value should be the code """
@@ -337,7 +342,8 @@ class DTEItems:
 										'Quantity':'QtyItem',
 										'Unit':'UnmdItem',
 										'UnitPrice':'PrcItem',
-										'ItemPrice':'MontoItem'
+										'ItemPrice':'MontoItem',
+										'DiscountValor':'DescuentoMonto'
 										}
 								}
 
@@ -844,57 +850,65 @@ class DTEBuidler:
 		items = 0
 		for child in tree:
 			""" Remove SII general tag """
-			tag = child.tag.replace('{http://www.sii.cl/SiiDte}','')
-			if len(child) > 1:
-				""" Extract elements """
-				if tag == 'Encabezado':
-					header = {}
-					parameters['Header'] = {}
-					parameters['Header'] = self.iterate_recurs_etree(child, header)
-				if tag == 'Caratula':
-					""" Specific headers """
-					spec = {}
-					parameters['User'] = {}
-					parameters['User'] = self.iterate_recurs_etree(child, spec)
-				if tag == 'Emisor':
-					sender = {}
-					parameters['Sender'] = {}
-					parameters['Sender'] = self.iterate_recurs_etree(child, sender)
-				if tag == 'Receptor':
-					receiver = {}
-					parameters['Receiver'] = {}
-					parameters['Receiver'] = self.iterate_recurs_etree(child, receiver)
-				if tag == 'Detalle':
-					item = {}
-					if items == 0:
-						parameters['Items'] = {}
-					parameters['Items'][items] = {}
-					parameters['Items'][items] = self.iterate_recurs_etree(child, item)
-					items = items + 1
-				if tag == 'References':
-					item = {}
-					if items == 0:
-						parameters['References'] = {}
-					parameters['References'][items] = {}
-					parameters['References'][items] = self.iterate_recurs_etree(child, item)
-					items = items + 1
-				if tag == 'CAF':
-					caf = {}
-					parameters['CAF'] = {}
-					parameters['CAF'] = self.iterate_recurs_etree(child, caf)
-				if tag == 'TED':
-					ted = {}
-					parameters['TED'] = {}
-					parameters['TED'] = self.iterate_recurs_etree(child, ted)
-					parameters['TED']['Dump'] = etree.tostring(child).decode('UTF-8')
-				if tag == 'Totales':
-					totals = {}
-					parameters['Totals'] = {}
-					parameters['Totals'] = self.iterate_recurs_etree(child, totals)
+			""" Could be comment too, in this case we skip """
+			if isinstance(child.tag, str):
+				tag = child.tag.replace('{http://www.sii.cl/SiiDte}','')
+				if len(child) > 1:
+					""" Extract elements """
+					if tag == 'Encabezado':
+						header = {}
+						parameters['Header'] = {}
+						parameters['Header'] = self.iterate_recurs_etree(child, header)
+					if tag == 'Caratula':
+						""" Specific headers """
+						spec = {}
+						parameters['User'] = {}
+						parameters['User'] = self.iterate_recurs_etree(child, spec)
+					if tag == 'Emisor':
+						sender = {}
+						parameters['Sender'] = {}
+						parameters['Sender'] = self.iterate_recurs_etree(child, sender)
+					if tag == 'Receptor':
+						receiver = {}
+						parameters['Receiver'] = {}
+						parameters['Receiver'] = self.iterate_recurs_etree(child, receiver)
+					if tag == 'Detalle':
+						item = {}
+						if 'Items' not in parameters:
+							items = 0
+							parameters['Items'] = {}
+						parameters['Items'][items] = {}
+						parameters['Items'][items] = self.iterate_recurs_etree(child, item)
+						items = items + 1
+					if tag == 'Referencia':
+						item = {}
+						if 'References' not in parameters:
+							items = 0
+							parameters['References'] = {}
+						parameters['References'][items] = {}
+						parameters['References'][items] = self.iterate_recurs_etree(child, item)
+						items = items + 1
+					if tag == 'CAF':
+						caf = {}
+						parameters['CAF'] = {}
+						parameters['CAF'] = self.iterate_recurs_etree(child, caf)
+					if tag == 'TED':
+						ted = {}
+						parameters['TED'] = {}
+						parameters['TED'] = self.iterate_recurs_etree(child, ted)
+						parameters['TED']['Dump'] = etree.tostring(child).decode('UTF-8')
+					if tag == 'Totales':
+						totals = {}
+						parameters['Totals'] = {}
+						parameters['Totals'] = self.iterate_recurs_etree(child, totals)
+					else:
+						self.iterate_recurs_etree(child, parameters)
 				else:
-					self.iterate_recurs_etree(child, parameters)
-			else:
-				parameters[tag] = child.text
+					if tag == "TpoDocRef":
+						""" Specific, convert document type to human readable """
+						parameters[tag] = child.text + "-" +  db_codes['Description']['ReferenceType'][child.text]
+					else:
+						parameters[tag] = child.text
 
 		return parameters
 
@@ -942,7 +956,7 @@ class DTEBuidler:
 		header = DTEHeader(sender, receiver, document_type, document_number, 1, datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT), {}, items.get_totales(iva_rate))
 		header.load_specifics_from_xml_parameters(document_type, header_parameters)
 		""" Build final DTE """
-		dte = DTE(header, items, discount='', reference='', other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
+		dte = DTE(header, items, discount='', reference=parameters['References'], other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
 
 		""" Extract tree and dump pretty XML """
 		dte_etree = etree.fromstring(dte.dump())
