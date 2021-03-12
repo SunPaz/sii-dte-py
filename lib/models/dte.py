@@ -45,8 +45,10 @@ class DTEPerson:
 								'Name':'RznSocRecep',
 								'Activity':'GiroRecep',
 								'Address':'DirRecep',
-								'Comune':'CmnaRecep',
-								'City':'CiudadRecep'
+								'City':'CmnaRecep',
+								'State':'CiudadRecep',
+								'Contact': 'Contacto',
+								'Email': 'CorreoRecep'
 							},
 				'Sender': {
 								'Type':'Emisor',
@@ -54,9 +56,10 @@ class DTEPerson:
 								'Name':'RznSoc',
 								'Activity':'GiroEmis',
 								'Address':'DirOrigen',
-								'Comune':'CmnaOrigen',
-								'City':'CiudadOrigen',
-								'Acteco':'Acteco'
+								'City':'CmnaOrigen',
+								'State':'CiudadOrigen',
+								'Acteco':'Acteco',
+								'Phone': 'Telefono'
 							}
 				}
 
@@ -177,7 +180,8 @@ class DTEHeader:
 										'User-RUT': 'RutEnvia',
 										'User-Resolution': 'NroResol',
 										'User-ResolutionDate' : 'FchResol',
-										'IssueDate' : 'FchEmis'
+										'IssueDate' : 'FchEmis',
+										'LimitDate': 'FchVenc'
 										}
 								}
 	__property_type_by_specific = {
@@ -275,6 +279,15 @@ class DTEHeader:
 		date = ''
 		if 'IssueDate' in self._specifics:
 			date = self._specifics['IssueDate']
+		else:
+			""" Now """
+			date = str(datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT))
+		return date
+
+	def get_expiry_date(self):
+		date = ''
+		if 'LimitDate' in self._specifics:
+			date = self._specifics['LimitDate']
 		else:
 			""" Now """
 			date = str(datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT))
@@ -738,7 +751,8 @@ class DTE:
 		dict = {
 				'Header': {
 					'Specifics': self._header.get_specifics_for_display(),
-					'Date': self._header.get_issue_date() #str(datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT_SHORT))
+					'IssuedDate': self._header.get_issue_date(), #str(datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT_SHORT))
+					'LimitDate': self._header.get_expiry_date()
 				},
 				'Sender': {
 							'RUT':self._header.sender.get_attr('RUT'),
@@ -747,7 +761,8 @@ class DTE:
 							'Address':self._header.sender.get_attr('Address'),
 							'Address2':'',
 							'City':self._header.sender.get_attr('City'),
-							'Phone':''
+							'Phone':self._header.sender.get_attr('Phone'),
+							'Contact': self._header.sender.get_attr('Contact')
 							},
 				'DocumentNumber': self._header.dte_document_number,
 				'SII' : 'SANTIAGO CENTRO',
@@ -757,8 +772,11 @@ class DTE:
 							'Activity':self._header.receiver.get_attr('Activity'),
 							'Address':self._header.receiver.get_attr('Address'),
 							'Address2':'',
-							'City':self._header.sender.get_attr('City'),
-							'Phone':''
+							'City':self._header.receiver.get_attr('City'),
+							'State':self._header.receiver.get_attr('State'),
+							'Phone':self._header.receiver.get_attr('Phone'),
+							'Contact': self._header.receiver.get_attr('Contact'),
+							'Email': self._header.receiver.get_attr('Email')
 				},
 				'Details': self._items.get_item_list_for_template(),
 				'References': self._reference,

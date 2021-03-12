@@ -99,7 +99,8 @@
 
     .receive-data-02 {
         position: relative;
-        float: right;
+        float: left;
+        margin-left: 1em;
     }
 
     .details {
@@ -177,12 +178,15 @@
                 </div>
                 <div class="receive-data-02">
                     RUT: <b>{{ parameters['Receiver']['RUT'] }}</b><br />
-                    Comuna: <b>{{ parameters['Receiver']['City'] | upper  }} </b> <br />
-                    Teléfono: <b> {{ parameters['Receiver']['Phone'] }}</b>
+                    Comuna, Ciudad : <b>{{ parameters['Receiver']['City'] | upper  }}, {{ parameters['Receiver']['State'] | upper  }} </b><br />
+                    Teléfono: <b> {{ parameters['Receiver']['Phone'] }} {{ parameters['Receiver']['Contact'] }} </b>
                 </div>
+                <div class="receive-data-02">
+                    Fecha emisión: <b> {{ parameters['Header']['IssuedDate'] }} </b><br />
+                    Fecha vencimiento: <b> {{ parameters['Header']['LimitDate'] }} </b><br />
+                    Contacto: <b> {{ parameters['Receiver']['Email'] }} </b> </div>
             </div>
             <div class="part details">
-                <br />
                 <table class="table" style="font-size:small">
                     <thead>
                         <tr>
@@ -202,7 +206,7 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ parameters['Details'][unit]['Code'] }}</td>
-                            <td>{{ parameters['Details'][unit]['Name'] }} {{ parameters['Details'][unit]['Description'] }} </td>
+                            <td>{{ parameters['Details'][unit]['Name'] }} <br /> {{ parameters['Details'][unit]['Description'] }} </td>
                             <td>{{ parameters['Details'][unit]['Quantity'] | int }} </td>
                             <!---<td>${{ format_price(parameters['Details'][unit]['UnitPrice'] | float | round, decimal_places=0) }}</td>-->
                             <td>{{ parameters['Details'][unit]['Unit'] }}</td>
