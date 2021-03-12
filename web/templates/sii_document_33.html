@@ -202,8 +202,8 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ parameters['Details'][unit]['Code'] }}</td>
-                            <td>{{ parameters['Details'][unit]['Name'] }}</td>
-                            <td>{{ parameters['Details'][unit]['Quantity'] | int }}</td>
+                            <td>{{ parameters['Details'][unit]['Name'] }} {{ parameters['Details'][unit]['Description'] }} </td>
+                            <td>{{ parameters['Details'][unit]['Quantity'] | int }} </td>
                             <!---<td>${{ format_price(parameters['Details'][unit]['UnitPrice'] | float | round, decimal_places=0) }}</td>-->
                             <td>{{ parameters['Details'][unit]['Unit'] }}</td>
                             <td>${{ parameters['Details'][unit]['DiscountValor'] }}</td>
