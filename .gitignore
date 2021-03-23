@@ -14,6 +14,7 @@
 ##############################
 *.log
 *.sql
+config.py
 
 # Certifactes and keys #
 ##############################
@@ -26,3 +27,5 @@
 # Temporary files #
 ###################
 /temp/*
+/env-sii-dte
+/.vs
