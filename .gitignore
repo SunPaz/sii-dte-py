@@ -14,7 +14,7 @@
 ##############################
 *.log
 *.sql
-config.py
+/instance/*.py
 
 # Certifactes and keys #
 ##############################
