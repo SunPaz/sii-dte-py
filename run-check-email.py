@@ -28,15 +28,16 @@ builder = DTEBuidler()
 # get all attachments for each email from INBOX folder
 with MailBox(SII_INBOX_EMAIL_SERVER).login(SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_PASSWORD) as mailbox:
 	for msg in mailbox.fetch("RECENT", mark_seen=False):
-		last_seen_uid = msg.uid
-		for att in msg.attachments:
-			""" Only XML """
-			if att.filename.upper().endswith(".XML"):
-				print("Getting " + att.filename, att.content_type)
-				try:
-					_, _, dte_object = builder.from_string(att.payload)
-					pdf.generate(dte_object, output_path="")
-				except:
-					print("Could not process file " + att.filename)
+		if msg.uid > last_seen_uid:
+			last_seen_uid = msg.uid
+			for att in msg.attachments:
+				""" Only XML """
+				if att.filename.upper().endswith(".XML"):
+					print("Getting " + att.filename, att.content_type)
+					try:
+						_, _, dte_object = builder.from_string(att.payload)
+						pdf.generate(dte_object, output_path="")
+					except:
+						print("Could not process file " + att.filename)
 
 save_last_seen_uid(last_seen_uid)
