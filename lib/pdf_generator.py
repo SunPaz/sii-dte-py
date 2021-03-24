@@ -22,7 +22,7 @@ class PDFGenerator:
 							33:'web/templates/sii_document_33.html'
 						}
 
-	def generate(self, dte):
+	def generate(self, dte, output_path=""):
 		# Use False instead of output path to save pdf to a variable
 		ted = self._generate_png_ted(dte.generate_ted())
 		html = self._populate_jinja_template(dte, ted)
@@ -34,7 +34,10 @@ class PDFGenerator:
 		}
 
 		filename = str(dte.get_document_id()) + '.pdf'
-		fullpath = FILE_DIR + '/../temp/' + filename
+		if output_path == "":
+			output_path = FILE_DIR + '/../temp/'
+
+		fullpath = output_path + filename
 
 		""" Path to wkhtmltopdf """
 		path_wkhtmltopdf = WKHTMLTOPDF_EXE_PATH
