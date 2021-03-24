@@ -864,6 +864,11 @@ class DTEBuidler:
 
 		return self.load_from_etree(root)
 
+	def from_string(self, string):
+		root = etree.fromstring(string)
+
+		return self.load_from_etree(root)
+
 	def iterate_recurs_etree(self, tree, parameters):
 		items = 0
 		for child in tree:
