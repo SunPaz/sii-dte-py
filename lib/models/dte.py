@@ -979,8 +979,10 @@ class DTEBuidler:
 		header = DTEHeader(sender, receiver, document_type, document_number, 1, datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT), {}, items.get_totales(iva_rate))
 		header.load_specifics_from_xml_parameters(document_type, header_parameters)
 		""" Build final DTE """
-		dte = DTE(header, items, discount='', reference=parameters['References'], other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
-
+		if 'References' in parameters:
+			dte = DTE(header, items, discount='', reference=parameters['References'], other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
+		else:
+			dte = DTE(header, items, discount='', reference='', other='', signature='', timestamp='',caf=caf, ted=dumped_ted)
 		""" Extract tree and dump pretty XML """
 		dte_etree = etree.fromstring(dte.dump())
 		pretty_dte = etree.tostring(dte_etree, pretty_print=True).decode('UTF-8')
