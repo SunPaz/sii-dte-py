@@ -37,7 +37,7 @@ with MailBox(SII_INBOX_EMAIL_SERVER).login(SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EM
 					print("Getting " + att.filename, att.content_type)
 					try:
 						_, _, dte_object = builder.from_string(att.payload)
-						pdf.generate(dte_object, output_path="", filename=str(dte_object._document_id) + "-" + str(dte_object._header.sender.get_attr("RUT")))
+						pdf.generate(dte_object, output_path="", filename=str(dte_object._document_id) + "-" + str(dte_object._header.sender.get_attr("RUT")) + ".pdf")
 					except:
 						print("Could not process file " + att.filename)
 
