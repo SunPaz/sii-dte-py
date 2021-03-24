@@ -4,17 +4,17 @@ from instance.config import SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_SERVER, SII
 
 def save_last_seen_uid(uid):
 	try:
-		with open(JSON_LAST_SEEN_PATH, "rw+") as write_file:
-			last_seen = json.dumps("{'uid':'" + str(uid) + "'}")
-			write_file.write(last_seen)
+		with open(JSON_LAST_SEEN_PATH, "w") as write_file:
+			context = json.dumps({'last_seen_uid': str(uid)}, indent=4, sort_keys=True)
+			write_file.write(context)
 	except:
 		print("save_last_seen_uid:: Error")
 
 def load_last_seen_uid():
 	try:
-		with open(JSON_LAST_SEEN_PATH, "r") as read_file:
-			last_seen = json.load(read_file)
-			return last_seen.uid
+		with open(JSON_LAST_SEEN_PATH,) as read_file:
+			context = json.load(read_file)
+			return context.last_seen_uid
 	except:
 		print("load_last_seen_uid:: Error")
 		return 0;
@@ -36,9 +36,6 @@ for num in data[0].split():
 	if uid > last_seen_uid:
 		""" Not seen """
 		last_seen_uid = uid
-		#print(str(data))
-
-	#print('Message: {0} {1}\n'.format(num, data))
 imap.close()
 
 save_last_seen_uid(last_seen_uid)
