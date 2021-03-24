@@ -27,8 +27,9 @@ builder = DTEBuidler()
 
 # get all attachments for each email from INBOX folder
 with MailBox(SII_INBOX_EMAIL_SERVER).login(SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_PASSWORD) as mailbox:
-	for msg in mailbox.fetch("RECENT", mark_seen=False):
-		if msg.uid > last_seen_uid:
+	""" Filter out analysis result from SII """
+	for msg in mailbox.fetch('NOT SUBJECT "Resultado de Revision" RECENT', mark_seen=False):
+		if int(msg.uid) > int(last_seen_uid):
 			last_seen_uid = msg.uid
 			for att in msg.attachments:
 				""" Only XML """
