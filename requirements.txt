@@ -5,3 +5,5 @@ zeep
 xmlsec
 pdfkit
 pdf417
+imap
+imap_tools
