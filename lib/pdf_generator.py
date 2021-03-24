@@ -17,9 +17,16 @@ from instance.config import WKHTMLTOPDF_EXE_PATH
 FILE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class PDFGenerator:
-	__template_by_type = {
+	__template_by_type = {						
+							33:'web/templates/sii_document_33.html',
+							34:'web/templates/sii_document_34.html',
+							46:'web/templates/sii_document_46.html',
 							52:'web/templates/sii_document_52.html',
-							33:'web/templates/sii_document_33.html'
+							56:'web/templates/sii_document_56.html',
+							61:'web/templates/sii_document_61.html',
+							110:'web/templates/sii_document_110.html',
+							111:'web/templates/sii_document_111.html',
+							112:'web/templates/sii_document_112.html'
 						}
 
 	def generate(self, dte, output_path="", filename=""):
