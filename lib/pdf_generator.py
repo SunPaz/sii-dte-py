@@ -76,8 +76,15 @@ class PDFGenerator:
 		template = Environment(loader=FileSystemLoader([FILE_DIR + '/web/templates', FILE_DIR + '/../temp'])).from_string(template_str)
 		""" Get template parameters """
 		template_parameters = dte.to_template_parameters()
+
 		""" Render """
-		html_str = template.render(parameters=template_parameters, ted=ted)
+		try:
+			html_str = template.render(parameters=template_parameters, ted=ted)
+		except Exception as e:
+			print("_populate_jinja_template:: Error while rendering template. Returning empty HTML.")
+			print(str(e))
+			html_str = "<div></div>"
+
 		return html_str
 
 	def _generate_svg_ted(self, ted_string):
