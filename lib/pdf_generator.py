@@ -22,7 +22,7 @@ class PDFGenerator:
 							33:'web/templates/sii_document_33.html'
 						}
 
-	def generate(self, dte, output_path=""):
+	def generate(self, dte, output_path="", filename=""):
 		# Use False instead of output path to save pdf to a variable
 		ted = self._generate_png_ted(dte.generate_ted())
 		html = self._populate_jinja_template(dte, ted)
@@ -33,7 +33,9 @@ class PDFGenerator:
 			'load-error-handling': 'ignore'
 		}
 
-		filename = str(dte.get_document_id()) + '.pdf'
+		if filename == "":
+			filename = str(dte.get_document_id()) + '.pdf'
+
 		if output_path == "":
 			output_path = FILE_DIR + '/../temp/'
 
