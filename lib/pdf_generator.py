@@ -63,7 +63,13 @@ class PDFGenerator:
 	def _populate_jinja_template(self, dte, ted):
 		""" Get template path by type """
 		document_type = dte.get_document_type()
-		template_path = self.__template_by_type[int(document_type)]
+
+		try:
+			template_path = self.__template_by_type[int(document_type)]
+		except:
+			print("_populate_jinja_template:: Template not declared for document type " + str(document_type) + " using 33 by default.")
+			template_path = self.__template_by_type[33]
+
 		with open(template_path, encoding="utf-8") as f:
 			template_str = f.read()
 		""" Load template """
