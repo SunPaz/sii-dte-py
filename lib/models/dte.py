@@ -1011,7 +1011,11 @@ class DTEBuidler:
 				else:
 					if tag == "TpoDocRef":
 						""" Specific, convert document type to human readable """
-						parameters[tag] = child.text + "-" +  db_codes['Description']['ReferenceType'][child.text]
+						try:
+							parameters[tag] = child.text + "-" +  db_codes['Description']['ReferenceType'][child.text]
+						except:
+							parameters[tag] = child.text + "-ND"
+							print("iterate_recurs_etree::TpoDocRef Reference type " + str(child.text) + " not defined.")
 					else:
 						parameters[tag] = child.text
 
