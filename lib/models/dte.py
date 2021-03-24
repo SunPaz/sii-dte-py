@@ -85,9 +85,9 @@ class DTEPerson:
 
 		for param in self._parameters:
 			try:
-				markup = self.__markup[self.__types[self._type]][param]
-				value = self._parameters[param]
-				dumped = dumped + '<' + markup + '>' + value + '</' + markup + '>'
+				markup = str(self.__markup[self.__types[self._type]][param])
+				value = str(self._parameters[param])
+				dumped = str(dumped) + '<' + markup + '>' + str(value) + '</' + markup + '>'
 			except KeyError:
 				""" Should not be output"""
 				pass
@@ -235,9 +235,9 @@ class DTEHeader:
 		dumped = ''
 		for param in self._specifics:
 			try:
-				markup = self.__specifics_by_document_type[self.dte_document_type][param]
-				value = self._specifics[param]
-				dumped = dumped + '<' + markup + '>' + str(value) + '</' + markup + '>'
+				markup = str(self.__specifics_by_document_type[self.dte_document_type][param])
+				value = str(self._specifics[param])
+				dumped = dumped + '<' + markup + '>' + value + '</' + markup + '>'
 			except:
 				continue
 
@@ -370,7 +370,7 @@ class DTEItems:
 	def dump_items(self):
 		dumped = ''
 		index = 0
-		index_markup = self.__properties_by_document_type[0]['Index']
+		index_markup = str(self.__properties_by_document_type[0]['Index'])
 		for item_key in self._items:
 			""" Get item """
 			item = self._items[item_key]
@@ -382,7 +382,7 @@ class DTEItems:
 				""" Build with common properties """
 				for prop in item:
 					try:
-						markup = self.__properties_by_document_type[0][prop]
+						markup = str(self.__properties_by_document_type[0][prop])
 						value = item[prop]
 						dumped = dumped + '<' + markup + '>' + str(value) + '</' + markup + '>'
 					except:
@@ -390,7 +390,7 @@ class DTEItems:
 				""" Specific properties """
 				for prop in item:
 					try:
-						markup = self.__properties_by_document_type[self._document_type][prop]
+						markup = str(self.__properties_by_document_type[self._document_type][prop])
 						value = item[prop]
 						dumped = dumped + '<' + markup + '>' + str(value) + '</' + markup + '>'
 					except:
@@ -582,12 +582,12 @@ class DTECAF:
 	def dump(self):
 		dumped = '<AUTORIZACION><CAF version="1.0"><DA>'
 		for param in self._parameters:
-			markup = self.__markup[param]
+			markup = str(self.__markup[param])
 			if '_' in param:
 				""" Should not be printed """
 				continue
 			value = self._parameters[param]
-			dumped = dumped + '<' + markup + '>' + value + '</' + markup + '>'
+			dumped = dumped + '<' + markup + '>' + str(value) + '</' + markup + '>'
 		""" Add range """
 		dumped = dumped + '<RSAPK><M>' + self._parameters['_RSAPrivateKeyModule'] + '</M><E>'+ self._parameters['_RSAPrivateKeyExp'] +'</E></RSAPK>'
 		dumped = dumped + '<RNG><D>' + self._parameters['_From'] + '</D><H>'+ self._parameters['_To'] +'</H></RNG>'
