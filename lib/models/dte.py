@@ -907,11 +907,19 @@ class DTEBuidler:
 					'_RSAPublicKey': 'RSAPUBK'
 					}
 
+	def _get_iva_by_document_type(self, type):
+		try:
+			return self.__iva_by_type[type]
+		except:
+			print("_get_iva_by_document_type:: IVA not defined for document type " + str(type))
+			print("_get_iva_by_document_type:: Return default 19%")
+			return 0.19
+
 	def build(self, type, sender, receiver, header, items, caf):
 		sender_object = DTEPerson(1, sender)
 		receiver_object = DTEPerson(0, receiver)
 		items_object = DTEItems(type, items)
-		iva_rate = self.__iva_by_type[type]
+		iva_rate = self._get_iva_by_document_type(type)
 
 		header_object = DTEHeader(sender=sender_object, receiver=receiver_object, document_type=type, \
 									document_number=header['DocumentNumber'], payment_method=header['PaymentType'], expiry_date=header['ExpiryDate'], \
@@ -1047,7 +1055,7 @@ class DTEBuidler:
 		items = DTEItems(document_type=document_type, items={})
 		items.load_from_xml_parameters(document_type=document_type, parameters=items_parameters)
 		""" Get IVA rate """
-		iva_rate = self.__iva_by_type[document_type]
+		iva_rate = self._get_iva_by_document_type(document_type)
 
 		""" Build header """
 		header = DTEHeader(sender, receiver, document_type, document_number, 1, datetime.datetime.now().strftime(DTE_SII_DATE_FORMAT), {}, items.get_totales(iva_rate))
