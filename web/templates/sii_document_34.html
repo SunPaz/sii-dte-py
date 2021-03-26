@@ -259,15 +259,15 @@
                             </tr>
                             <tr>
                                 <td>Monto Neto</td>
-                                <td>${{ format_price(parameters['Totales']['Net'] | float | round, decimal_places=0) }}</td>
+                                <td>$0<</td>
                             </tr>
                             <tr>
                                 <td>Monto Exento</td>
-                                <td>$0</td>
+                                <td>${{ format_price(parameters['Totales']['Net'] | float | round, decimal_places=0) }}</td>
                             </tr>
                             <tr>
                                 <td>IVA ({{ format_price(parameters['Totales']['Rate'] | float * 100, decimal_places=1) }} %)</td>
-                                <td>${{ format_price(parameters['Totales']['Rate'] | float * parameters['Totales']['Net'] | float | round, decimal_places=0)  }}</td>
+                                <td>$0</td>
                             </tr>
                             <tr>
                                 <td>Monto Total</td>
