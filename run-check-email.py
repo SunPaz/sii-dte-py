@@ -2,7 +2,8 @@ from imap_tools import MailBox
 from lib.models.dte import DTEBuidler
 from lib.pdf_generator import PDFGenerator
 import json
-from instance.config import SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_SERVER, SII_INBOX_EMAIL_PASSWORD, JSON_LAST_SEEN_PATH
+from instance.config import SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_SERVER, SII_INBOX_EMAIL_PASSWORD, SII_INBOX_IMAP_CRITERIA
+from instance.config import JSON_LAST_SEEN_PATH
 
 def save_last_seen_uid(uid):
 	try:
@@ -28,7 +29,7 @@ builder = DTEBuidler()
 # get all attachments for each email from INBOX folder
 with MailBox(SII_INBOX_EMAIL_SERVER).login(SII_INBOX_EMAIL_ACCOUNT, SII_INBOX_EMAIL_PASSWORD) as mailbox:
 	""" Filter out analysis result from SII """
-	for msg in mailbox.fetch('NOT SUBJECT "Resultado de Revision" RECENT', mark_seen=False):
+	for msg in mailbox.fetch(SII_INBOX_IMAP_CRITERIA, mark_seen=False):
 		if int(msg.uid) > int(last_seen_uid):
 			last_seen_uid = msg.uid
 			for att in msg.attachments:

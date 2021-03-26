@@ -11,4 +11,5 @@ WKHTMLTOPDF_EXE_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 SII_INBOX_EMAIL_SERVER = ""
 SII_INBOX_EMAIL_ACCOUNT = ""
 SII_INBOX_EMAIL_PASSWORD = ""
+SII_INBOX_IMAP_CRITERIA = 'NOT SUBJECT "Resultado de Revision" RECENT'
 JSON_LAST_SEEN_PATH = "last_seen.json"
