@@ -128,7 +128,7 @@ def get_token():
 			""" Store in session """
 			session['token'] = token.to_json()
 			return token.to_json(), 200
-		return "Certificate not loaded.", 400
+	return "Certificate not loaded.", 400
 
 @app.route('/dte',  methods=['POST'])
 @cross_origin()
@@ -136,6 +136,7 @@ def set_dte():
 	""" Format : """
 	"""
 	{
+	'DocumentType':'52',
 	'DocumentNumber': '', 'SII': '',
 	'Header': {
 		'Specifics': {
@@ -147,6 +148,9 @@ def set_dte():
 		},
 	'Date': '',
 	'Receiver': {
+		'Name': '', 'Address': '', 'Activity': '', 'RUT': '', 'City': '', 'Phone': ''
+	},
+	'Sender': {
 		'Name': '', 'Address': '', 'Activity': '', 'RUT': '', 'City': '', 'Phone': ''
 	},
 	'Details':
@@ -168,8 +172,8 @@ def set_dte():
 	pdf = PDFGenerator()
 	form_parameters = request.get_json(force=True)
 
-	sender_parameters = {}
 	receiver_parameters = form_parameters['Receiver']
+	sender_parameters = form_parameters['Sender']
 
 	specific_header_parameters = form_parameters['Header']['Specifics']
 	specific_header_parameters['DocumentNumber'] = form_parameters['DocumentNumber']
@@ -179,10 +183,6 @@ def set_dte():
 	specific_header_parameters['PaymentType'] = ''
 
 	item_list = form_parameters['Details']
-
-	""" Read sender file """
-	with open('test/data/sender.json') as json_file:
-		sender_parameters = json.load(json_file)
 
 	builder = DTEBuidler()
 	""" Bind user information """
@@ -199,13 +199,12 @@ def set_dte():
 	tree, pretty_dte, dte_object = builder.build(type, sender_parameters, receiver_parameters, specific_header_parameters, item_list, caf)
 	pdfFilename, binary_pdf = pdf.generate_binary(dte_object)
 
-
 	if uid not in _document_list_by_uid:
 		_document_list_by_uid[uid] = {}
 
-	_document_list_by_uid[uid][pdfFilename] = binary_pdf;
+	_document_list_by_uid[uid][dte_object.get_document_id()] = (dte_object, pretty_dte);
 
-	return pdfFilename, 200
+	return dte_object.get_document_id(), 200
 
 @app.route('/caf',  methods=['POST'])
 @cross_origin()
@@ -223,13 +222,19 @@ def set_caf():
 def generate_preview(document_id):
 	""" Get preview from previously built document """
 	uid = str(session['uid'])
-	binary_pdf = _document_list_by_uid[uid][document_id]
+	pdf = PDFGenerator()
+	""" We have a document with this id """
+	if uid in _document_list_by_uid and document_id in _document_list_by_uid[uid]:
+		dte_object, _ = _document_list_by_uid[uid][document_id]
+		_, binary_pdf = pdf.generate_binary(dte_object)
 
-	response = make_response(binary_pdf)
-	response.headers['Content-Type'] = 'application/pdf'
-	response.headers['Content-Disposition'] = \
-	'attachment; filename=%s.pdf' % document_id
-	return response
+		response = make_response(binary_pdf)
+		response.headers['Content-Type'] = 'application/pdf'
+		response.headers['Content-Disposition'] = \
+		'attachment; filename=%s.pdf' % document_id
+		return response
+	else:
+		return "No document " + str(document_id) + " found", 404
 
 @app.route('/document/form/<int:type>', methods=['GET'])
 @cross_origin()
@@ -268,7 +273,7 @@ def get_document_form(type):
 
 @app.route('/document/test/<int:type>/pdf', methods=['GET'])
 @cross_origin()
-def generate_pdf(type):
+def generate_test_pdf(type):
 	uid = str(session['uid'])
 	""" Get parameters, build PDF and return file """
 	pdf = PDFGenerator()
@@ -307,7 +312,7 @@ def generate_pdf(type):
 	'attachment; filename=%s.pdf' % pdfFilename
 	return response
 
-@app.route('/dte/<string:document_id>/sii',  methods=['POST'])
+@app.route('/dte/<string:document_id>/sii',  methods=['PUT'])
 @cross_origin()
 def send_to_sii(document_id):
 	""" Send DTE file stored in session at specified ID to SII """
